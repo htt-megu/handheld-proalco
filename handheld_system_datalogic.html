@@ -1,0 +1,842 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);color:var(--text-primary);font-size:14px}
+.nav{display:flex;gap:4px;margin-bottom:1.5rem;border-bottom:0.5px solid var(--border);padding-bottom:10px;flex-wrap:wrap}
+.nav-btn{padding:6px 12px;border-radius:var(--radius);border:none;background:transparent;cursor:pointer;font-size:12px;color:var(--text-secondary);white-space:nowrap}
+.nav-btn.active{background:var(--bg-accent);color:var(--text-accent);font-weight:500}
+.view{display:none}.view.active{display:block}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
+.metric{background:var(--surface-1);border-radius:var(--radius);padding:12px 14px}
+.metric-label{font-size:11px;color:var(--text-secondary);margin-bottom:4px}
+.metric-value{font-size:22px;font-weight:500}
+.metric-value.accent{color:var(--text-accent)}
+.metric-value.warning{color:var(--text-warning)}
+.metric-value.danger{color:var(--text-danger)}
+.metric-value.success{color:var(--text-success)}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem}
+.card{background:var(--surface-2);border:0.5px solid var(--border);border-radius:12px;padding:16px}
+.card-title{font-size:13px;font-weight:500;margin-bottom:12px;color:var(--text-secondary)}
+.field{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}
+.field label{font-size:12px;color:var(--text-secondary)}
+.field input,.field select,.field textarea{border:0.5px solid var(--border);border-radius:var(--radius);padding:7px 10px;font-size:13px;background:var(--surface-2);color:var(--text-primary);width:100%}
+.field input:focus,.field select:focus{outline:none;border-color:var(--border-accent)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.btn{padding:7px 14px;border-radius:var(--radius);border:0.5px solid var(--border-strong);background:transparent;cursor:pointer;font-size:13px;color:var(--text-primary)}
+.btn:hover{background:var(--surface-1)}
+.btn-accent{background:var(--fill-accent);color:#fff;border-color:var(--fill-accent)}
+.btn-accent:hover{opacity:.9}
+.btn-success{background:var(--fill-success);color:#fff;border-color:var(--fill-success)}
+.btn-danger{color:var(--text-danger);border-color:var(--border-danger)}
+.btn-danger:hover{background:var(--bg-danger)}
+.btn-sm{padding:4px 9px;font-size:12px}
+.badge{display:inline-block;padding:2px 8px;border-radius:var(--radius);font-size:11px;font-weight:500}
+.badge-incidencia{background:#FAEEDA;color:#633806}
+.badge-solicitud{background:#E6F1FB;color:#0C447C}
+.badge-abierto{background:#FCEBEB;color:#791F1F}
+.badge-en-proceso{background:#FAEEDA;color:#633806}
+.badge-resuelto{background:#EAF3DE;color:#27500A}
+.badge-alta{background:#FCEBEB;color:#A32D2D}
+.badge-media{background:#FAEEDA;color:#633806}
+.badge-baja{background:#EAF3DE;color:#27500A}
+.badge-activo{background:#EAF3DE;color:#27500A}
+.badge-danado{background:#FCEBEB;color:#791F1F}
+.badge-baja-eq{background:#F1EFE8;color:#444441}
+.badge-muna{background:#EEEDFE;color:#3C3489}
+.badge-malambo{background:#E1F5EE;color:#085041}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;padding:8px 10px;font-size:11px;color:var(--text-secondary);border-bottom:0.5px solid var(--border);font-weight:500;white-space:nowrap}
+.tbl td{padding:8px 10px;border-bottom:0.5px solid var(--border);vertical-align:middle}
+.tbl tr:hover td{background:var(--surface-1)}
+.filters{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+.filters select,.filters input{padding:5px 10px;border:0.5px solid var(--border);border-radius:var(--radius);font-size:12px;background:var(--surface-2);color:var(--text-primary)}
+.section-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.section-title{font-size:15px;font-weight:500}
+.form-card{background:var(--surface-2);border:0.5px solid var(--border);border-radius:12px;padding:18px;margin-bottom:1.5rem}
+.err{font-size:11px;color:var(--text-danger);margin-top:3px;display:none}
+.toast{background:var(--surface-2);border:0.5px solid var(--border-success);border-radius:var(--radius);padding:9px 14px;font-size:13px;color:var(--text-success);margin-bottom:1rem;display:none}
+.detail-panel{background:var(--surface-1);border:0.5px solid var(--border-accent);border-radius:12px;padding:16px;margin-bottom:1rem;display:none}
+.plant-tabs{display:flex;gap:6px;margin-bottom:1rem}
+.plant-tab{padding:5px 14px;border-radius:var(--radius);border:0.5px solid var(--border);cursor:pointer;font-size:12px;color:var(--text-secondary);background:transparent}
+.plant-tab.active-muna{background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;font-weight:500}
+.plant-tab.active-malambo{background:#E1F5EE;color:#085041;border-color:#5DCAA5;font-weight:500}
+.hh-card{background:var(--surface-2);border:0.5px solid var(--border);border-radius:10px;padding:14px;transition:border-color .15s}
+.hh-card:hover{border-color:var(--border-strong)}
+.hh-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:1rem}
+.confirm-box{background:var(--bg-danger);border:0.5px solid var(--border-danger);border-radius:var(--radius);padding:10px 14px;font-size:13px;margin-top:8px;display:none}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;font-size:11px;color:var(--text-secondary)}
+.legend-item{display:flex;align-items:center;gap:4px}
+.legend-sq{width:9px;height:9px;border-radius:2px}
+</style>
+
+<h2 class="sr-only">Sistema handheld Datalogic — PROALCO Muña y Malambo</h2>
+<div id="toast" class="toast"></div>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="setView('dashboard')"><i class="ti ti-chart-bar" aria-hidden="true"></i> Dashboard</button>
+  <button class="nav-btn" onclick="setView('inventario')"><i class="ti ti-device-mobile" aria-hidden="true"></i> Inventario</button>
+  <button class="nav-btn" onclick="setView('nuevo-hh')"><i class="ti ti-plus" aria-hidden="true"></i> Nueva handheld</button>
+  <button class="nav-btn" onclick="setView('nuevo-ticket')"><i class="ti ti-ticket" aria-hidden="true"></i> Nuevo ticket</button>
+  <button class="nav-btn" onclick="setView('tickets')"><i class="ti ti-list" aria-hidden="true"></i> Tickets</button>
+  <button class="nav-btn" onclick="setView('reporte')"><i class="ti ti-file-export" aria-hidden="true"></i> Reporte</button>
+</div>
+
+<!-- DASHBOARD -->
+<div class="view active" id="view-dashboard">
+  <div class="metric-grid" id="metricGrid"></div>
+  <div class="chart-row">
+    <div class="card">
+      <div class="card-title">Handhelds por planta</div>
+      <div class="legend" id="legPlanta"></div>
+      <div style="position:relative;height:170px"><canvas id="cPlanta" role="img" aria-label="Handhelds por planta"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Tickets por estado</div>
+      <div class="legend" id="legEstado"></div>
+      <div style="position:relative;height:170px"><canvas id="cEstado" role="img" aria-label="Tickets por estado"></canvas></div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:1.5rem">
+    <div class="card-title">Actividad mensual — tickets</div>
+    <div style="position:relative;height:150px"><canvas id="cMes" role="img" aria-label="Actividad mensual"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Handhelds con más incidencias</div>
+    <div id="topHH"></div>
+  </div>
+</div>
+
+<!-- INVENTARIO -->
+<div class="view" id="view-inventario">
+  <div class="section-hdr">
+    <span class="section-title">Inventario Datalogic</span>
+    <button class="btn btn-accent btn-sm" onclick="setView('nuevo-hh')"><i class="ti ti-plus" aria-hidden="true"></i> Agregar</button>
+  </div>
+  <div class="plant-tabs">
+    <button class="plant-tab active-muna" id="tabMuna" onclick="setPlantFilter('Muña')">Muña (<span id="cntMuna">0</span>)</button>
+    <button class="plant-tab" id="tabMalambo" onclick="setPlantFilter('Malambo')">Malambo (<span id="cntMalambo">0</span>)</button>
+    <button class="plant-tab" id="tabTodas" onclick="setPlantFilter('Todas')">Todas (<span id="cntTodas">0</span>)</button>
+  </div>
+  <div class="filters">
+    <select id="filtEstHH" onchange="renderInventario()"><option value="">Todos los estados</option><option>Activo</option><option>Dañado</option><option>Baja</option></select>
+    <select id="filtAreaHH" onchange="renderInventario()"><option value="">Todas las áreas</option></select>
+    <input type="text" id="filtBusHH" placeholder="Buscar serie, modelo, responsable..." oninput="renderInventario()" style="width:220px">
+  </div>
+  <div id="detailHH" class="detail-panel"></div>
+  <div id="hhGrid" class="hh-grid"></div>
+</div>
+
+<!-- NUEVA HANDHELD -->
+<div class="view" id="view-nuevo-hh">
+  <div class="form-card">
+    <div class="section-hdr"><span class="section-title">Registrar handheld Datalogic</span></div>
+    <div class="grid2">
+      <div class="field">
+        <label>Planta *</label>
+        <select id="hhPlanta" oninput="clearE('ehhPlanta')">
+          <option value="">Seleccione...</option>
+          <option>Muña</option>
+          <option>Malambo</option>
+        </select>
+        <span class="err" id="ehhPlanta">Obligatorio</span>
+      </div>
+      <div class="field">
+        <label>Modelo Datalogic *</label>
+        <select id="hhModelo" oninput="clearE('ehhModelo')">
+          <option value="">Seleccione...</option>
+          <option>Datalogic Memor 10</option>
+          <option>Datalogic Memor 20</option>
+          <option>Datalogic Skorpio X4</option>
+          <option>Datalogic Skorpio X5</option>
+          <option>Datalogic Falcon X4</option>
+          <option>Datalogic Joya Touch A6</option>
+          <option>Datalogic Rhino II</option>
+          <option>Otro Datalogic</option>
+        </select>
+        <span class="err" id="ehhModelo">Obligatorio</span>
+      </div>
+    </div>
+    <div class="grid3">
+      <div class="field">
+        <label>N° de serie *</label>
+        <input type="text" id="hhSerie" placeholder="Ej: DL-2024-001" oninput="clearE('ehhSerie')">
+        <span class="err" id="ehhSerie">Obligatorio</span>
+      </div>
+      <div class="field">
+        <label>ID interno</label>
+        <input type="text" id="hhId" placeholder="Ej: HH-MUN-001">
+      </div>
+      <div class="field">
+        <label>Estado</label>
+        <select id="hhEstado">
+          <option>Activo</option>
+          <option>Dañado</option>
+          <option>Baja</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>Área asignada</label>
+        <select id="hhArea">
+          <option value="">Sin asignar</option>
+          <option>Producción</option>
+          <option>Bodega</option>
+          <option>Despacho</option>
+          <option>Calidad</option>
+          <option>Mantenimiento</option>
+          <option>Administración</option>
+          <option>Logística</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Responsable asignado</label>
+        <input type="text" id="hhResponsable" placeholder="Nombre del responsable">
+      </div>
+    </div>
+    <div class="field">
+      <label>Observaciones</label>
+      <input type="text" id="hhObs" placeholder="Notas adicionales del equipo">
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px">
+      <button class="btn" onclick="limpiarHH()">Limpiar</button>
+      <button class="btn btn-accent" onclick="guardarHH()"><i class="ti ti-device-floppy" aria-hidden="true"></i> Guardar handheld</button>
+    </div>
+  </div>
+</div>
+
+<!-- NUEVO TICKET -->
+<div class="view" id="view-nuevo-ticket">
+  <div class="form-card">
+    <div class="section-hdr"><span class="section-title">Registrar ticket</span></div>
+    <div class="grid2">
+      <div class="field">
+        <label>Tipo *</label>
+        <select id="fTipo" oninput="clearE('eTipo')">
+          <option value="">Seleccione...</option>
+          <option>Incidencia</option>
+          <option>Solicitud</option>
+        </select>
+        <span class="err" id="eTipo">Obligatorio</span>
+      </div>
+      <div class="field">
+        <label>Prioridad *</label>
+        <select id="fPrioridad" oninput="clearE('ePrioridad')">
+          <option value="">Seleccione...</option>
+          <option>Alta</option>
+          <option>Media</option>
+          <option>Baja</option>
+        </select>
+        <span class="err" id="ePrioridad">Obligatorio</span>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>Planta</label>
+        <select id="fPlanta" onchange="actualizarSelectHH()">
+          <option value="">Todas</option>
+          <option>Muña</option>
+          <option>Malambo</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Handheld afectada *</label>
+        <select id="fHandheld" oninput="clearE('eHandheld')">
+          <option value="">Seleccione una handheld...</option>
+        </select>
+        <span class="err" id="eHandheld">Obligatorio</span>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>Categoría</label>
+        <select id="fCategoria">
+          <option value="">Seleccione...</option>
+          <option>Hardware — pantalla</option>
+          <option>Hardware — batería</option>
+          <option>Hardware — lector de código</option>
+          <option>Hardware — golpe / caída</option>
+          <option>Software — aplicación</option>
+          <option>Software — sistema operativo</option>
+          <option>Conectividad — WiFi</option>
+          <option>Conectividad — red</option>
+          <option>Reposición de equipo</option>
+          <option>Asignación nueva</option>
+          <option>Cambio de equipo</option>
+          <option>Configuración</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Reportado por</label>
+        <input type="text" id="fReportado" placeholder="Nombre del compañero">
+      </div>
+    </div>
+    <div class="field">
+      <label>Descripción *</label>
+      <textarea id="fDesc" placeholder="Describa el problema o solicitud..." style="min-height:70px;border:0.5px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:13px;background:var(--surface-2);color:var(--text-primary);width:100%;resize:vertical" oninput="clearE('eDesc')"></textarea>
+      <span class="err" id="eDesc">Obligatorio</span>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>Acciones realizadas</label>
+        <textarea id="fAcciones" placeholder="¿Qué intentó hacer?" style="min-height:50px;border:0.5px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:13px;background:var(--surface-2);color:var(--text-primary);width:100%;resize:vertical"></textarea>
+      </div>
+      <div class="field">
+        <label>Estado inicial</label>
+        <select id="fEstado">
+          <option>Abierto</option>
+          <option>En proceso</option>
+          <option>Resuelto</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px">
+      <button class="btn" onclick="limpiarTicket()">Limpiar</button>
+      <button class="btn btn-accent" onclick="guardarTicket()"><i class="ti ti-check" aria-hidden="true"></i> Guardar ticket</button>
+    </div>
+  </div>
+</div>
+
+<!-- TICKETS -->
+<div class="view" id="view-tickets">
+  <div class="section-hdr">
+    <span class="section-title">Tickets</span>
+    <button class="btn btn-accent btn-sm" onclick="setView('nuevo-ticket')"><i class="ti ti-plus" aria-hidden="true"></i> Nuevo</button>
+  </div>
+  <div class="filters">
+    <select id="filtTipo" onchange="renderTickets()"><option value="">Todos los tipos</option><option>Incidencia</option><option>Solicitud</option></select>
+    <select id="filtEst" onchange="renderTickets()"><option value="">Todos los estados</option><option>Abierto</option><option>En proceso</option><option>Resuelto</option></select>
+    <select id="filtPlanta" onchange="renderTickets()"><option value="">Ambas plantas</option><option>Muña</option><option>Malambo</option></select>
+    <input type="text" id="filtBus" placeholder="Buscar..." oninput="renderTickets()" style="width:160px">
+  </div>
+  <div id="ticketDetail" class="detail-panel"></div>
+  <table class="tbl">
+    <thead><tr><th>ID</th><th>Tipo</th><th>Planta</th><th>Handheld</th><th>Categoría</th><th>Prioridad</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
+    <tbody id="ticketsBody"></tbody>
+  </table>
+</div>
+
+<!-- REPORTE -->
+<div class="view" id="view-reporte">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div>
+      <div style="font-size:15px;font-weight:500">Reporte mensual — Datalogic</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">PROALCO S.A.S. | Bekaert</div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <select id="selMes" onchange="renderReporte()" style="padding:5px 10px;border:0.5px solid var(--border);border-radius:var(--radius);font-size:12px;background:var(--surface-2);color:var(--text-primary)">
+        <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option><option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option><option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option><option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+      </select>
+      <select id="selAnio" onchange="renderReporte()" style="padding:5px 10px;border:0.5px solid var(--border);border-radius:var(--radius);font-size:12px;background:var(--surface-2);color:var(--text-primary)">
+        <option>2026</option><option>2025</option>
+      </select>
+      <select id="selPlantaRep" onchange="renderReporte()" style="padding:5px 10px;border:0.5px solid var(--border);border-radius:var(--radius);font-size:12px;background:var(--surface-2);color:var(--text-primary)">
+        <option value="">Ambas plantas</option><option>Muña</option><option>Malambo</option>
+      </select>
+      <button class="btn btn-success btn-sm" onclick="exportCSV()"><i class="ti ti-download" aria-hidden="true"></i> Exportar CSV</button>
+    </div>
+  </div>
+  <div id="reporteContent"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+let handhelds=[], tickets=[], hhSeq=1, tkSeq=1, charts={}, plantFilter='Muña';
+
+function seedData(){
+  const modelos=['Datalogic Memor 10','Datalogic Memor 20','Datalogic Skorpio X4','Datalogic Falcon X4'];
+  const plantas=['Muña','Malambo'];
+  const areas=['Producción','Bodega','Despacho','Calidad','Mantenimiento','Logística'];
+  const estados=['Activo','Activo','Activo','Dañado','Baja'];
+  const responsables=['Carlos Gómez','María Torres','Luis Pérez','Ana Rodríguez','Jorge Martínez','Sandra López'];
+  for(let i=0;i<22;i++){
+    const planta=plantas[i%2];
+    const pref=planta==='Muña'?'MUN':'MAL';
+    handhelds.push({
+      id:'HH-'+pref+'-'+String(hhSeq).padStart(3,'0'),
+      serie:'DL-'+String(2024+Math.floor(i/10))+'-'+String(hhSeq).padStart(3,'0'),
+      modelo:modelos[i%4],
+      planta,
+      area:areas[i%6],
+      responsable:responsables[i%6],
+      estado:estados[i%5],
+      obs:'',
+      fechaReg:new Date().toISOString()
+    });
+    hhSeq++;
+  }
+  const cats=['Hardware — pantalla','Hardware — batería','Conectividad — WiFi','Software — aplicación','Hardware — lector de código','Reposición de equipo'];
+  const descs=['Pantalla no responde','Batería no carga','Sin conexión WiFi','App cierra inesperadamente','Lector falla al escanear','Solicitud equipo de reposición'];
+  const estadosTk=['Abierto','En proceso','Resuelto'];
+  const tipos=['Incidencia','Solicitud'];
+  const priors=['Alta','Media','Baja'];
+  const now=new Date();
+  for(let i=0;i<24;i++){
+    const hh=handhelds[Math.floor(Math.random()*handhelds.length)];
+    const d=new Date(now);
+    d.setDate(d.getDate()-Math.floor(Math.random()*60));
+    tickets.push({
+      id:'TK-'+String(tkSeq++).padStart(4,'0'),
+      tipo:tipos[i%2],
+      prioridad:priors[i%3],
+      hhId:hh.id,
+      hhSerie:hh.serie,
+      hhModelo:hh.modelo,
+      planta:hh.planta,
+      area:hh.area,
+      categoria:cats[i%6],
+      reportado:'Compañero '+(i+1),
+      desc:descs[i%6],
+      acciones:'Reinicio y verificación de configuración.',
+      estado:estadosTk[i%3],
+      fecha:d.toISOString()
+    });
+  }
+}
+
+seedData();
+
+function setView(v){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  const ids=['dashboard','inventario','nuevo-hh','nuevo-ticket','tickets','reporte'];
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',ids[i]===v));
+  document.getElementById('view-'+v).classList.add('active');
+  if(v==='dashboard') renderDashboard();
+  if(v==='inventario'){updateAreaFilter();renderInventario();}
+  if(v==='tickets') renderTickets();
+  if(v==='nuevo-ticket') actualizarSelectHH();
+  if(v==='reporte'){document.getElementById('selMes').value=new Date().getMonth();renderReporte();}
+}
+
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.style.display='block';
+  t.style.borderColor=type==='danger'?'var(--border-danger)':'var(--border-success)';
+  t.style.color=type==='danger'?'var(--text-danger)':'var(--text-success)';
+  setTimeout(()=>t.style.display='none',3000);
+}
+
+function clearE(id){const el=document.getElementById(id);if(el)el.style.display='none';}
+function fmt(iso){const d=new Date(iso);return`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;}
+function badgeTipo(t){return`<span class="badge badge-${t.toLowerCase()}">${t}</span>`;}
+function badgeEst(e){const k=e.toLowerCase().replace(' ','-');return`<span class="badge badge-${k}">${e}</span>`;}
+function badgePrior(p){return`<span class="badge badge-${p.toLowerCase()}">${p}</span>`;}
+function badgePlanta(p){const k=p.toLowerCase().replace('ñ','n');return`<span class="badge badge-${k}">${p}</span>`;}
+function badgeEstHH(e){const k=e==='Dañado'?'danado':e==='Baja'?'baja-eq':e.toLowerCase();return`<span class="badge badge-${k}">${e}</span>`;}
+
+function renderDashboard(){
+  const total=handhelds.length;
+  const activos=handhelds.filter(h=>h.estado==='Activo').length;
+  const danados=handhelds.filter(h=>h.estado==='Dañado').length;
+  const tkTotal=tickets.length;
+  const tkAbiertos=tickets.filter(t=>t.estado==='Abierto').length;
+  const tkResueltos=tickets.filter(t=>t.estado==='Resuelto').length;
+  const tkProceso=tickets.filter(t=>t.estado==='En proceso').length;
+  document.getElementById('metricGrid').innerHTML=`
+    <div class="metric"><div class="metric-label">Total handhelds</div><div class="metric-value accent">${total}</div></div>
+    <div class="metric"><div class="metric-label">Activas</div><div class="metric-value success">${activos}</div></div>
+    <div class="metric"><div class="metric-label">Dañadas</div><div class="metric-value danger">${danados}</div></div>
+    <div class="metric"><div class="metric-label">Tickets abiertos</div><div class="metric-value warning">${tkAbiertos}</div></div>
+  `;
+  const isDark=document.documentElement.dataset.mode==='dark'||matchMedia('(prefers-color-scheme:dark)').matches;
+  const muted=isDark?'#898781':'#898781';
+  const grid=isDark?'#2c2c2a':'#e1e0d9';
+  const baseOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:muted,font:{size:11}},grid:{display:false}},y:{ticks:{color:muted,font:{size:11},stepSize:1},grid:{color:grid}}}};
+
+  const muna=handhelds.filter(h=>h.planta==='Muña').length;
+  const malam=handhelds.filter(h=>h.planta==='Malambo').length;
+  document.getElementById('legPlanta').innerHTML=`<div class="legend-item"><div class="legend-sq" style="background:#534AB7"></div>Muña ${muna}</div><div class="legend-item"><div class="legend-sq" style="background:#0F6E56"></div>Malambo ${malam}</div>`;
+  if(charts.planta) charts.planta.destroy();
+  charts.planta=new Chart(document.getElementById('cPlanta'),{type:'bar',data:{labels:['Muña','Malambo'],datasets:[{data:[muna,malam],backgroundColor:['#534AB7','#0F6E56'],borderRadius:4,barThickness:40}]},options:{...baseOpts}});
+
+  document.getElementById('legEstado').innerHTML=`<div class="legend-item"><div class="legend-sq" style="background:#e34948"></div>Abiertos ${tkAbiertos}</div><div class="legend-item"><div class="legend-sq" style="background:#eda100"></div>En proceso ${tkProceso}</div><div class="legend-item"><div class="legend-sq" style="background:#1baf7a"></div>Resueltos ${tkResueltos}</div>`;
+  if(charts.estado) charts.estado.destroy();
+  charts.estado=new Chart(document.getElementById('cEstado'),{type:'bar',data:{labels:['Abiertos','En proceso','Resueltos'],datasets:[{data:[tkAbiertos,tkProceso,tkResueltos],backgroundColor:['#e34948','#eda100','#1baf7a'],borderRadius:4,barThickness:36}]},options:{...baseOpts}});
+
+  const now=new Date();
+  const mLabels=[],mData=[];
+  for(let i=5;i>=0;i--){
+    const m=new Date(now.getFullYear(),now.getMonth()-i,1);
+    mLabels.push(MESES[m.getMonth()].substring(0,3));
+    mData.push(tickets.filter(t=>{const td=new Date(t.fecha);return td.getMonth()===m.getMonth()&&td.getFullYear()===m.getFullYear();}).length);
+  }
+  if(charts.mes) charts.mes.destroy();
+  charts.mes=new Chart(document.getElementById('cMes'),{type:'line',data:{labels:mLabels,datasets:[{data:mData,borderColor:'#2a78d6',backgroundColor:'rgba(42,120,214,0.08)',borderWidth:2,tension:0.3,pointBackgroundColor:'#2a78d6',pointRadius:4}]},options:{...baseOpts}});
+
+  const byHH={};
+  tickets.filter(t=>t.tipo==='Incidencia').forEach(t=>{byHH[t.hhId]=(byHH[t.hhId]||0)+1;});
+  const top=Object.entries(byHH).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  document.getElementById('topHH').innerHTML=top.length?top.map(([id,n])=>{
+    const hh=handhelds.find(h=>h.id===id);
+    const max=top[0][1];
+    return`<div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+        <span><span style="font-family:var(--font-mono);color:var(--text-accent)">${id}</span> <span style="color:var(--text-secondary)">${hh?hh.modelo:''}</span> ${hh?badgePlanta(hh.planta):''}</span>
+        <span style="font-weight:500">${n} inc.</span>
+      </div>
+      <div style="background:var(--surface-1);border-radius:4px;height:6px"><div style="background:#e34948;width:${Math.round(n/max*100)}%;height:6px;border-radius:4px"></div></div>
+    </div>`;
+  }).join(''):'<div style="color:var(--text-muted);font-size:13px;padding:8px 0">Sin incidencias registradas</div>';
+}
+
+function updateAreaFilter(){
+  const sel=document.getElementById('filtAreaHH');
+  const areas=[...new Set(handhelds.map(h=>h.area).filter(Boolean))].sort();
+  sel.innerHTML='<option value="">Todas las áreas</option>'+areas.map(a=>`<option>${a}</option>`).join('');
+}
+
+function setPlantFilter(p){
+  plantFilter=p;
+  ['tabMuna','tabMalambo','tabTodas'].forEach(id=>{
+    document.getElementById(id).className='plant-tab';
+  });
+  if(p==='Muña') document.getElementById('tabMuna').className='plant-tab active-muna';
+  else if(p==='Malambo') document.getElementById('tabMalambo').className='plant-tab active-malambo';
+  else document.getElementById('tabTodas').className='plant-tab active-muna';
+  renderInventario();
+}
+
+function renderInventario(){
+  document.getElementById('cntMuna').textContent=handhelds.filter(h=>h.planta==='Muña').length;
+  document.getElementById('cntMalambo').textContent=handhelds.filter(h=>h.planta==='Malambo').length;
+  document.getElementById('cntTodas').textContent=handhelds.length;
+  const estF=document.getElementById('filtEstHH').value;
+  const areaF=document.getElementById('filtAreaHH').value;
+  const busF=document.getElementById('filtBusHH').value.toLowerCase();
+  let list=handhelds.filter(h=>
+    (plantFilter==='Todas'||h.planta===plantFilter)&&
+    (!estF||h.estado===estF)&&
+    (!areaF||h.area===areaF)&&
+    (!busF||(h.id+h.serie+h.modelo+h.responsable).toLowerCase().includes(busF))
+  );
+  document.getElementById('hhGrid').innerHTML=list.length?list.map(h=>{
+    const tkCount=tickets.filter(t=>t.hhId===h.id).length;
+    const tkAb=tickets.filter(t=>t.hhId===h.id&&t.estado==='Abierto').length;
+    return`<div class="hh-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <span style="font-family:var(--font-mono);font-size:12px;color:var(--text-accent);font-weight:500">${h.id}</span>
+        ${badgeEstHH(h.estado)}
+      </div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:4px">${h.modelo}</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:2px"><i class="ti ti-barcode" aria-hidden="true"></i> ${h.serie}</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:2px"><i class="ti ti-map-pin" aria-hidden="true"></i> ${h.planta} — ${h.area||'Sin área'}</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px"><i class="ti ti-user" aria-hidden="true"></i> ${h.responsable||'Sin asignar'}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;border-top:0.5px solid var(--border);padding-top:8px">
+        <span style="font-size:11px;color:var(--text-secondary)">${tkCount} tickets${tkAb>0?` <span style="color:var(--text-danger);font-weight:500">(${tkAb} abiertos)</span>`:''}</span>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-sm" onclick="verDetalleHH('${h.id}')" title="Ver detalle"><i class="ti ti-eye" aria-hidden="true"></i></button>
+          <button class="btn btn-sm" onclick="editarHH('${h.id}')" title="Editar"><i class="ti ti-edit" aria-hidden="true"></i></button>
+          <button class="btn btn-sm btn-danger" onclick="confirmarEliminar('${h.id}')" title="Eliminar"><i class="ti ti-trash" aria-hidden="true"></i></button>
+        </div>
+      </div>
+    </div>`;
+  }).join(''):`<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-muted);font-size:13px">Sin handhelds registradas con estos filtros</div>`;
+}
+
+function verDetalleHH(id){
+  const h=handhelds.find(x=>x.id===id);
+  if(!h)return;
+  const panel=document.getElementById('detailHH');
+  if(panel.style.display==='block'&&panel.dataset.id===id){panel.style.display='none';return;}
+  panel.dataset.id=id;panel.style.display='block';
+  const tkHH=tickets.filter(t=>t.hhId===id);
+  const tkAb=tkHH.filter(t=>t.estado==='Abierto').length;
+  const tkRes=tkHH.filter(t=>t.estado==='Resuelto').length;
+  panel.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span style="font-weight:500">${h.id} — ${h.modelo}</span>
+      <button class="btn btn-sm" onclick="document.getElementById('detailHH').style.display='none'"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;font-size:12px">
+      <div><span style="color:var(--text-secondary)">Serie</span><br><span style="font-family:var(--font-mono)">${h.serie}</span></div>
+      <div><span style="color:var(--text-secondary)">Planta</span><br>${badgePlanta(h.planta)}</div>
+      <div><span style="color:var(--text-secondary)">Estado</span><br>${badgeEstHH(h.estado)}</div>
+      <div><span style="color:var(--text-secondary)">Área</span><br>${h.area||'—'}</div>
+      <div><span style="color:var(--text-secondary)">Responsable</span><br>${h.responsable||'—'}</div>
+      <div><span style="color:var(--text-secondary)">Tickets totales</span><br><span style="font-weight:500">${tkHH.length}</span> (${tkAb} abiertos, ${tkRes} resueltos)</div>
+    </div>
+    ${tkHH.length?`<div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px">Últimos tickets:</div>
+    <table class="tbl" style="font-size:12px">
+      <thead><tr><th>ID</th><th>Tipo</th><th>Categoría</th><th>Estado</th><th>Fecha</th></tr></thead>
+      <tbody>${tkHH.slice(0,5).map(t=>`<tr>
+        <td style="font-family:var(--font-mono);color:var(--text-secondary)">${t.id}</td>
+        <td>${badgeTipo(t.tipo)}</td>
+        <td style="color:var(--text-secondary)">${t.categoria||'—'}</td>
+        <td>${badgeEst(t.estado)}</td>
+        <td>${fmt(t.fecha)}</td>
+      </tr>`).join('')}</tbody>
+    </table>`:'<div style="font-size:12px;color:var(--text-muted)">Sin tickets asociados</div>'}
+    <div style="margin-top:10px;display:flex;gap:6px">
+      <button class="btn btn-accent btn-sm" onclick="setView(\'nuevo-ticket\');document.getElementById(\'fHandheld\').value=\'${id}\'">Crear ticket para esta handheld</button>
+    </div>
+  `;
+}
+
+function editarHH(id){
+  const h=handhelds.find(x=>x.id===id);
+  if(!h)return;
+  setView('nuevo-hh');
+  setTimeout(()=>{
+    document.getElementById('hhPlanta').value=h.planta;
+    document.getElementById('hhModelo').value=h.modelo;
+    document.getElementById('hhSerie').value=h.serie;
+    document.getElementById('hhId').value=h.id;
+    document.getElementById('hhEstado').value=h.estado;
+    document.getElementById('hhArea').value=h.area||'';
+    document.getElementById('hhResponsable').value=h.responsable||'';
+    document.getElementById('hhObs').value=h.obs||'';
+    handhelds=handhelds.filter(x=>x.id!==id);
+    showToast('Editando '+h.id+' — guarda para actualizar');
+  },50);
+}
+
+function confirmarEliminar(id){
+  const h=handhelds.find(x=>x.id===id);
+  if(!h)return;
+  const tkCount=tickets.filter(t=>t.hhId===id).length;
+  const panel=document.getElementById('detailHH');
+  panel.style.display='block';panel.dataset.id=id;
+  panel.innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px">
+      <i class="ti ti-alert-triangle" style="font-size:20px;color:var(--text-danger)" aria-hidden="true"></i>
+      <div>
+        <div style="font-weight:500;color:var(--text-danger)">Eliminar ${h.id}</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">Esta handheld tiene <strong>${tkCount}</strong> ticket(s) asociado(s). Solo se eliminará el equipo, los tickets quedarán.</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <button class="btn btn-danger btn-sm" onclick="eliminarHH('${id}')"><i class="ti ti-trash" aria-hidden="true"></i> Sí, eliminar</button>
+      <button class="btn btn-sm" onclick="document.getElementById('detailHH').style.display='none'">Cancelar</button>
+    </div>
+  `;
+}
+
+function eliminarHH(id){
+  handhelds=handhelds.filter(h=>h.id!==id);
+  document.getElementById('detailHH').style.display='none';
+  renderInventario();
+  showToast('Handheld eliminada del inventario','danger');
+}
+
+function guardarHH(){
+  let ok=true;
+  if(!document.getElementById('hhPlanta').value){document.getElementById('ehhPlanta').style.display='block';ok=false;}
+  if(!document.getElementById('hhModelo').value){document.getElementById('ehhModelo').style.display='block';ok=false;}
+  if(!document.getElementById('hhSerie').value.trim()){document.getElementById('ehhSerie').style.display='block';ok=false;}
+  if(!ok)return;
+  const planta=document.getElementById('hhPlanta').value;
+  const pref=planta==='Muña'?'MUN':'MAL';
+  const idCustom=document.getElementById('hhId').value.trim();
+  const newId=idCustom||('HH-'+pref+'-'+String(hhSeq).padStart(3,'0'));
+  if(handhelds.find(h=>h.id===newId)){showToast('Ya existe una handheld con ese ID','danger');return;}
+  handhelds.push({
+    id:newId,
+    serie:document.getElementById('hhSerie').value.trim(),
+    modelo:document.getElementById('hhModelo').value,
+    planta,
+    area:document.getElementById('hhArea').value,
+    responsable:document.getElementById('hhResponsable').value.trim(),
+    estado:document.getElementById('hhEstado').value,
+    obs:document.getElementById('hhObs').value.trim(),
+    fechaReg:new Date().toISOString()
+  });
+  hhSeq++;
+  limpiarHH();
+  showToast('Handheld registrada correctamente');
+  setView('inventario');
+}
+
+function limpiarHH(){
+  ['hhPlanta','hhModelo','hhArea','hhEstado'].forEach(id=>document.getElementById(id).value='');
+  ['hhSerie','hhId','hhResponsable','hhObs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('hhEstado').value='Activo';
+}
+
+function actualizarSelectHH(){
+  const planta=document.getElementById('fPlanta').value;
+  const sel=document.getElementById('fHandheld');
+  const lista=planta?handhelds.filter(h=>h.planta===planta):handhelds;
+  sel.innerHTML='<option value="">Seleccione una handheld...</option>'+
+    lista.map(h=>`<option value="${h.id}">${h.id} — ${h.modelo} (${h.planta})</option>`).join('');
+}
+
+function guardarTicket(){
+  let ok=true;
+  if(!document.getElementById('fTipo').value){document.getElementById('eTipo').style.display='block';ok=false;}
+  if(!document.getElementById('fPrioridad').value){document.getElementById('ePrioridad').style.display='block';ok=false;}
+  if(!document.getElementById('fHandheld').value){document.getElementById('eHandheld').style.display='block';ok=false;}
+  if(!document.getElementById('fDesc').value.trim()){document.getElementById('eDesc').style.display='block';ok=false;}
+  if(!ok)return;
+  const hhId=document.getElementById('fHandheld').value;
+  const hh=handhelds.find(h=>h.id===hhId)||{};
+  tickets.unshift({
+    id:'TK-'+String(tkSeq++).padStart(4,'0'),
+    tipo:document.getElementById('fTipo').value,
+    prioridad:document.getElementById('fPrioridad').value,
+    hhId,
+    hhSerie:hh.serie||'',
+    hhModelo:hh.modelo||'',
+    planta:hh.planta||document.getElementById('fPlanta').value||'',
+    area:hh.area||'',
+    categoria:document.getElementById('fCategoria').value,
+    reportado:document.getElementById('fReportado').value.trim(),
+    desc:document.getElementById('fDesc').value.trim(),
+    acciones:document.getElementById('fAcciones').value.trim(),
+    estado:document.getElementById('fEstado').value,
+    fecha:new Date().toISOString()
+  });
+  limpiarTicket();
+  showToast('Ticket registrado y vinculado a '+hhId);
+  setView('tickets');
+}
+
+function limpiarTicket(){
+  ['fTipo','fPrioridad','fPlanta','fHandheld','fCategoria','fEstado'].forEach(id=>document.getElementById(id).value='');
+  ['fReportado','fDesc','fAcciones'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fEstado').value='Abierto';
+  actualizarSelectHH();
+}
+
+function renderTickets(){
+  const tipo=document.getElementById('filtTipo').value;
+  const est=document.getElementById('filtEst').value;
+  const planta=document.getElementById('filtPlanta').value;
+  const bus=document.getElementById('filtBus').value.toLowerCase();
+  const list=tickets.filter(t=>
+    (!tipo||t.tipo===tipo)&&(!est||t.estado===est)&&(!planta||t.planta===planta)&&
+    (!bus||(t.id+t.hhId+t.desc+t.categoria).toLowerCase().includes(bus))
+  );
+  document.getElementById('ticketsBody').innerHTML=list.length?list.map(t=>`
+    <tr>
+      <td style="font-family:var(--font-mono);font-size:12px;color:var(--text-secondary)">${t.id}</td>
+      <td>${badgeTipo(t.tipo)}</td>
+      <td>${t.planta?badgePlanta(t.planta):'—'}</td>
+      <td style="font-family:var(--font-mono);font-size:12px;color:var(--text-accent)">${t.hhId}</td>
+      <td style="font-size:12px;color:var(--text-secondary);max-width:130px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${t.categoria||'—'}</td>
+      <td>${badgePrior(t.prioridad)}</td>
+      <td>${badgeEst(t.estado)}</td>
+      <td style="font-size:12px;color:var(--text-secondary)">${fmt(t.fecha)}</td>
+      <td><button class="btn btn-sm" onclick="toggleTicketDetail('${t.id}')"><i class="ti ti-eye" aria-hidden="true"></i></button></td>
+    </tr>`).join(''):`<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--text-muted);font-size:13px">Sin resultados</td></tr>`;
+}
+
+function toggleTicketDetail(id){
+  const t=tickets.find(x=>x.id===id);if(!t)return;
+  const panel=document.getElementById('ticketDetail');
+  if(panel.style.display==='block'&&panel.dataset.id===id){panel.style.display='none';return;}
+  panel.dataset.id=id;panel.style.display='block';
+  const hh=handhelds.find(h=>h.id===t.hhId);
+  panel.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span style="font-weight:500">${t.id}</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <select onchange="cambiarEstadoTk('${t.id}',this.value)" style="padding:4px 8px;border:0.5px solid var(--border);border-radius:var(--radius);font-size:12px;background:var(--surface-2);color:var(--text-primary)">
+          <option ${t.estado==='Abierto'?'selected':''}>Abierto</option>
+          <option ${t.estado==='En proceso'?'selected':''}>En proceso</option>
+          <option ${t.estado==='Resuelto'?'selected':''}>Resuelto</option>
+        </select>
+        <button class="btn btn-sm" onclick="document.getElementById('ticketDetail').style.display='none'"><i class="ti ti-x" aria-hidden="true"></i></button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:12px;margin-bottom:8px">
+      <div><span style="color:var(--text-secondary)">Tipo</span><br>${badgeTipo(t.tipo)}</div>
+      <div><span style="color:var(--text-secondary)">Prioridad</span><br>${badgePrior(t.prioridad)}</div>
+      <div><span style="color:var(--text-secondary)">Planta</span><br>${t.planta?badgePlanta(t.planta):'—'}</div>
+      <div><span style="color:var(--text-secondary)">Handheld</span><br><span style="font-family:var(--font-mono);color:var(--text-accent)">${t.hhId}</span></div>
+      <div><span style="color:var(--text-secondary)">Modelo</span><br>${hh?hh.modelo:t.hhModelo||'—'}</div>
+      <div><span style="color:var(--text-secondary)">Área</span><br>${t.area||'—'}</div>
+    </div>
+    <div style="font-size:12px;margin-bottom:6px"><span style="color:var(--text-secondary)">Descripción:</span><br>${t.desc}</div>
+    ${t.acciones?`<div style="font-size:12px"><span style="color:var(--text-secondary)">Acciones:</span><br>${t.acciones}</div>`:''}
+  `;
+}
+
+function cambiarEstadoTk(id,est){
+  const t=tickets.find(x=>x.id===id);if(t){t.estado=est;renderTickets();showToast('Estado actualizado: '+est);}
+}
+
+function renderReporte(){
+  const mes=parseInt(document.getElementById('selMes').value);
+  const anio=parseInt(document.getElementById('selAnio').value);
+  const planta=document.getElementById('selPlantaRep').value;
+  const filt=tickets.filter(t=>{const d=new Date(t.fecha);return d.getMonth()===mes&&d.getFullYear()===anio&&(!planta||t.planta===planta);});
+  const total=filt.length,inc=filt.filter(t=>t.tipo==='Incidencia').length,sol=filt.filter(t=>t.tipo==='Solicitud').length;
+  const ab=filt.filter(t=>t.estado==='Abierto').length,res=filt.filter(t=>t.estado==='Resuelto').length,alta=filt.filter(t=>t.prioridad==='Alta').length;
+  const byPlanta={Muña:filt.filter(t=>t.planta==='Muña').length,Malambo:filt.filter(t=>t.planta==='Malambo').length};
+  const byHH={};filt.forEach(t=>{byHH[t.hhId]=(byHH[t.hhId]||0)+1;});
+  const topHH=Object.entries(byHH).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const byCat={};filt.forEach(t=>{if(t.categoria)byCat[t.categoria]=(byCat[t.categoria]||0)+1;});
+  document.getElementById('reporteContent').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem">
+      <div class="metric"><div class="metric-label">Total tickets</div><div class="metric-value accent">${total}</div></div>
+      <div class="metric"><div class="metric-label">Incidencias</div><div class="metric-value warning">${inc}</div></div>
+      <div class="metric"><div class="metric-label">Solicitudes</div><div class="metric-value accent">${sol}</div></div>
+      <div class="metric"><div class="metric-label">Resueltos</div><div class="metric-value success">${res}</div></div>
+      <div class="metric"><div class="metric-label">Pendientes</div><div class="metric-value danger">${ab}</div></div>
+      <div class="metric"><div class="metric-label">Prioridad alta</div><div class="metric-value danger">${alta}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem">
+      <div class="card">
+        <div class="card-title">Por planta</div>
+        ${['Muña','Malambo'].map(p=>`<div style="margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px"><span>${p}</span><span style="font-weight:500">${byPlanta[p]||0}</span></div>
+          <div style="background:var(--surface-1);border-radius:4px;height:6px"><div style="background:${p==='Muña'?'#534AB7':'#0F6E56'};width:${total?Math.round((byPlanta[p]||0)/total*100):0}%;height:6px;border-radius:4px"></div></div>
+        </div>`).join('')}
+      </div>
+      <div class="card">
+        <div class="card-title">Handhelds más afectadas</div>
+        ${topHH.length?topHH.map(([id,n])=>{
+          const hh=handhelds.find(h=>h.id===id);
+          return`<div style="margin-bottom:6px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px">
+              <span style="font-family:var(--font-mono);color:var(--text-accent)">${id}</span>
+              <span style="font-weight:500">${n}</span>
+            </div>
+            <div style="background:var(--surface-1);border-radius:4px;height:6px"><div style="background:#e34948;width:${total?Math.round(n/total*100):0}%;height:6px;border-radius:4px"></div></div>
+          </div>`;
+        }).join(''):'<div style="color:var(--text-muted);font-size:12px">Sin datos</div>'}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Detalle — ${MESES[mes]} ${anio}${planta?' · '+planta:''}</div>
+      ${filt.length?`<table class="tbl" style="font-size:12px">
+        <thead><tr><th>ID</th><th>Tipo</th><th>Planta</th><th>Handheld</th><th>Categoría</th><th>Prioridad</th><th>Estado</th><th>Fecha</th></tr></thead>
+        <tbody>${filt.map(t=>`<tr>
+          <td style="font-family:var(--font-mono);color:var(--text-secondary)">${t.id}</td>
+          <td>${badgeTipo(t.tipo)}</td>
+          <td>${t.planta?badgePlanta(t.planta):'—'}</td>
+          <td style="font-family:var(--font-mono);font-size:11px;color:var(--text-accent)">${t.hhId}</td>
+          <td style="max-width:120px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${t.categoria||'—'}</td>
+          <td>${badgePrior(t.prioridad)}</td>
+          <td>${badgeEst(t.estado)}</td>
+          <td>${fmt(t.fecha)}</td>
+        </tr>`).join('')}</tbody>
+      </table>`:`<div style="text-align:center;padding:2rem;color:var(--text-muted);font-size:13px">Sin tickets en ${MESES[mes]} ${anio}${planta?' para '+planta:''}</div>`}
+    </div>
+  `;
+}
+
+function exportCSV(){
+  const mes=parseInt(document.getElementById('selMes').value);
+  const anio=parseInt(document.getElementById('selAnio').value);
+  const planta=document.getElementById('selPlantaRep').value;
+  const filt=tickets.filter(t=>{const d=new Date(t.fecha);return d.getMonth()===mes&&d.getFullYear()===anio&&(!planta||t.planta===planta);});
+  if(!filt.length){showToast('Sin tickets en este periodo','danger');return;}
+  const hdrs=['ID Ticket','Tipo','Prioridad','Planta','ID Handheld','Serie','Modelo','Área','Categoría','Reportado por','Descripción','Acciones','Estado','Fecha'];
+  const rows=filt.map(t=>[t.id,t.tipo,t.prioridad,t.planta,t.hhId,t.hhSerie,t.hhModelo,t.area,t.categoria,t.reportado,'"'+t.desc.replace(/"/g,'""')+'"','"'+(t.acciones||'').replace(/"/g,'""')+'"',t.estado,fmt(t.fecha)].join(','));
+  const csv='\uFEFF'+hdrs.join(',')+'\n'+rows.join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`Reporte_Handheld_${MESES[mes]}_${anio}${planta?'_'+planta:''}.csv`;
+  a.click();URL.revokeObjectURL(url);
+  showToast('CSV exportado correctamente');
+}
+
+renderDashboard();
+actualizarSelectHH();
+document.getElementById('selMes').value=new Date().getMonth();
+</script>
